@@ -1,2 +1,3 @@
-# Mathematical-Modeling2020
- Mathematical-Modeling2020
+# GMCM2020
+GMCM2020
+
