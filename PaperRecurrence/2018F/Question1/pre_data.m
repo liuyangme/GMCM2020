@@ -41,7 +41,6 @@ load('PlaneLeaveTime.mat','PlaneLeaveTime');
 
 I=303;   %飞机数 
 J=69;    %登机口数量
-
 w=zeros(I,J);
 for i=1:I
     for j=1:J
@@ -52,14 +51,16 @@ for i=1:I
                 elseif PlaneLeaveType(i)==PortLeaveType(j)
                     w(i,j)=1;
                 end
+
             elseif PlaneArrivalType(i)==PortArrivalType(j)
                 if PortLeaveType(j)==2
                     w(i,j)=1;
                 elseif PlaneLeaveType(i)==PortLeaveType(j)
                     w(i,j)=1;
                 end
-            end   
-        end  
+            end  
+        end
+        
     end
 end
 
@@ -68,42 +69,24 @@ end
 % r值的判断应该是大于等于
 % 赋值逻辑不完整
 
-% for m=1:I
-%     for n=1:I
-%         if m==n
-%             r=0;
-%         else
-%             r=LeaveTime(m)-ArrivalTime(n);
-%         end
-%         if   r>45                 
-%             tho(m,n)=0;           %第m架飞机和第n架飞机可以停靠在同一登机口
-%         else
-%             tho(m,n)=1;           %第m架飞机和第n架飞机不可以停靠在同一登机口
-%         end
-%     end
-% end
+
 
 tho=zeros(I,I);
 % 初始化是全零矩阵
-
 % 1：不能停靠在同一登机口
 % 0：可以停靠在同一登机口
 
-% 20200831 这里还是有问题
-
-for m=1:I 
-    for n=1:I
-        if m==n 
-            IntervalTime = 0; %同一架航班不做比较
-            tho(m,n) = 1;
-        else 
-            IntervalTime = PlaneArrivalTime(m) - PlaneLeaveTime(n); %计算两架航班的间隔时间
-            if IntervalTime >= 45
-                tho(m,n) = 0;
-            else
-                tho(m,n) = 1;
-            end
+for m=1:I-1 
+    for n=m+1:I
+      
+        IntervalTime1 = PlaneArrivalTime(m) - PlaneLeaveTime(n); %计算两架航班的间隔时间,m先到达
+        IntervalTime2 = PlaneArrivalTime(n) - PlaneLeaveTime(m); %计算两架航班的间隔时间,n先到达
+        if IntervalTime1 >= 45 ||IntervalTime2 >= 45
+           tho(m,n) = 0;
+        else
+           tho(m,n) = 1;
         end
+        
     end
 end
 
