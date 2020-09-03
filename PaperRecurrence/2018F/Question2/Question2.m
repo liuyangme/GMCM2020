@@ -40,16 +40,19 @@ TransIISS=20;
 
 x = binvar(I,J);
 y = binvar(1,J);
-
+Ta= binvar(1,1649);
+Tl= binvar(1,1649);
+Sa= binvar(1,1649);
+Sl= binvar(1,1649);
 %目标函数
 % u = 0.005;   %权重（权重设置需要考量）
 u = 0.01;
 lamda = 100000;
 
-z = (Da*Dl*Ta*Tl*TransDDTT+Da*Dl*Ta*Sl*TransDDTS+Da*Dl*Sa*Tl*TransDDST+Da*Dl*Sa*Sl*TransDDSS...
-+Da*Il*Ta*Tl*TransDITT+Da*Il*Ta*Sl*TransDITS+Da*Il*Sa*Tl*TransDIST+Da*Il*Sa*Sl*TransDISS...
-+Ia*Dl*Ta*Tl*TransIDTT+Ia*Dl*Ta*Sl*TransIDTS+Ia*Dl*Sa*Tl*TransIDST+Ia*Dl*Sa*Sl*TransIDSS...
-+Ia*Il*Ta*Tl*TransIITT+Ia*Il*Ta*Sl*TransIITS+Ia*Il*Sa*Tl*TransIIST+Ia*Il*Sa*Sl*TransIISS)*PassengerNumber...
+z = (Da.*Dl.*Ta.*Tl*TransDDTT+Da.*Dl.*Ta.*Sl.*TransDDTS+Da.*Dl.*Sa.*Tl.*TransDDST+Da.*Dl.*Sa.*Sl.*TransDDSS...
++Da.*Il.*Ta.*Tl.*TransDITT+Da.*Il.*Ta.*Sl.*TransDITS+Da.*Il.*Sa.*Tl.*TransDIST+Da.*Il.*Sa.*Sl.*TransDISS...
++Ia.*Dl.*Ta.*Tl.*TransIDTT+Ia.*Dl.*Ta.*Sl.*TransIDTS+Ia.*Dl.*Sa.*Tl.*TransIDST+Ia.*Dl.*Sa.*Sl.*TransIDSS...
++Ia.*Il.*Ta.*Tl.*TransIITT+Ia.*Il.*Ta.*Sl.*TransIITS+Ia.*Il.*Sa.*Tl.*TransIIST+Ia.*Il.*Sa.*Sl.*TransIISS)*PassengerNumber...
 -lamda*sum(x(:))+u*sum(y);  %目标函数
 
 
@@ -96,31 +99,41 @@ for m=1:I-1
 end
 toc
 
+% %约束条件5---是否在航站楼登机口
+% tic
+% c5=[];
+% for i=1:I
+%     temp=0;
+%     for j=1:Jt
+%         temp=temp+x(i,j);
+%     end
+%     c5=[c5;temp==Ti];
+% end
+% toc
+% 
+% %约束条件6---是否在卫星厅登机口
+% tic
+% c6=[];
+% for i=1:I
+%     temp=0;
+%     for j=Jt+1:J
+%         temp=temp+x(i,j);
+%     end
+%     c6=[c6;temp==Si];
+% end
+% toc
+
+
 %约束条件5---是否在航站楼登机口
 tic
 c5=[];
-for i=1:I
-    temp=0;
-    for j=1:Jt
-        temp=temp+x(i,j);
-    end
-    c5=[c5;temp==Ti];
-end
-toc
-
-%约束条件6---是否在卫星厅登机口
-tic
 c6=[];
-for i=1:I
-    temp=0;
-    for j=Jt+1:J
-        temp=temp+x(i,j);
-    end
-    c6=[c6;temp==Si];
+for i=1:length(Da)
+    
+    c5=[c5;Ta(i)+Sa(i)<=1];
+    c6=[c6;Tl(i)+Sl(i)<=1];
 end
 toc
-
-
 C=[c1;c2;c3;c4;c5;c6];
 
 % 配置
@@ -137,12 +150,17 @@ else
     disp('求解出错');
 end
 
-x1=value(x);
-y1=value(y);
-save('x.mat','x1') 
-save('y.mat','y1')
+x2=value(x);
+y2=value(y);
+save('x2.mat','x2') 
+save('y2.mat','y2')
 
 %查看结果用，不重要
 % length(find(y1))   
 % fenpei=sum(x1,2)
 % find(fenpei==0)    
+x_Q1=load('C:\Users\张耹铭\Desktop\18F最终版\x.mat','x1')
+find(abs(x1-x_Q1.x1))
+
+
+
