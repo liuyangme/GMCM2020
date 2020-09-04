@@ -6,7 +6,7 @@ load w;
 load tho;
 
 load('Da_Dl_Ia_Il.mat')
-load('PassengerNumber.mat')
+load('PlaneTracePeopleNumber.mat')
 
 I=303;   %飞机数
 J=69;    %登机口数量
@@ -40,20 +40,45 @@ TransIISS=20;
 
 x = binvar(I,J);
 y = binvar(1,J);
-Ta= binvar(1,1649);
-Tl= binvar(1,1649);
-Sa= binvar(1,1649);
-Sl= binvar(1,1649);
+
+T= binvar(1,I);
+S= binvar(1,I);
 %目标函数
 % u = 0.005;   %权重（权重设置需要考量）
 u = 0.01;
 lamda = 100000;
+count=0;
+for i=1:303
+    for j=1:303
+       if trace_nop_mat(i,j)~=0;
+          count=count+1;
+          time(count)=(Da(i)*Dl(j)*T(i)*T(j)*TransDDTT+...
+           Da(i)*Dl(j)*T(i)*S(j)*TransDDTS+...
+           Da(i)*Dl(j)*S(i)*T(j)*TransDDST+...
+           Da(i)*Dl(j)*S(i)*S(j)*TransDDSS+...
+           Da(i)*Il(j)*T(i)*T(j)*TransDITT+...
+           Da(i)*Il(j)*T(i)*S(j)*TransDITS+...
+           Da(i)*Il(j)*S(i)*T(j)*TransDIST+...
+           Da(i)*Il(j)*S(i)*S(j)*TransDISS+...
+           Ia(i)*Dl(j)*T(i)*T(j)*TransIDTT+...
+           Ia(i)*Dl(j)*T(i)*S(j)*TransIDTS+...
+           Ia(i)*Dl(j)*S(i)*T(j)*TransIDST+...
+           Ia(i)*Dl(j)*S(i)*S(j)*TransIDSS+...
+           Ia(i)*Il(j)*T(i)*T(i)*TransIITT+...
+           Ia(i)*Il(j)*T(i)*S(i)*TransIITS+...
+           Ia(i)*Il(j)*S(i)*T(i)*TransIIST+...
+           Ia(i)*Il(j)*S(i)*S(i)*TransIISS)*trace_nop_mat(i,j);
+       end
+    end  
+end
 
-z = (Da.*Dl.*Ta.*Tl*TransDDTT+Da.*Dl.*Ta.*Sl.*TransDDTS+Da.*Dl.*Sa.*Tl.*TransDDST+Da.*Dl.*Sa.*Sl.*TransDDSS...
-+Da.*Il.*Ta.*Tl.*TransDITT+Da.*Il.*Ta.*Sl.*TransDITS+Da.*Il.*Sa.*Tl.*TransDIST+Da.*Il.*Sa.*Sl.*TransDISS...
-+Ia.*Dl.*Ta.*Tl.*TransIDTT+Ia.*Dl.*Ta.*Sl.*TransIDTS+Ia.*Dl.*Sa.*Tl.*TransIDST+Ia.*Dl.*Sa.*Sl.*TransIDSS...
-+Ia.*Il.*Ta.*Tl.*TransIITT+Ia.*Il.*Ta.*Sl.*TransIITS+Ia.*Il.*Sa.*Tl.*TransIIST+Ia.*Il.*Sa.*Sl.*TransIISS)*PassengerNumber...
--lamda*sum(x(:))+u*sum(y);  %目标函数
+z1=sum(time);   %目标一
+
+z=z1-lamda*sum(x(:))+u*sum(y);  %目标函数
+
+
+
+
 
 
 tic
@@ -99,41 +124,41 @@ for m=1:I-1
 end
 toc
 
-% %约束条件5---是否在航站楼登机口
-% tic
-% c5=[];
-% for i=1:I
-%     temp=0;
-%     for j=1:Jt
-%         temp=temp+x(i,j);
-%     end
-%     c5=[c5;temp==Ti];
-% end
-% toc
-% 
-% %约束条件6---是否在卫星厅登机口
-% tic
-% c6=[];
-% for i=1:I
-%     temp=0;
-%     for j=Jt+1:J
-%         temp=temp+x(i,j);
-%     end
-%     c6=[c6;temp==Si];
-% end
-% toc
-
-
 %约束条件5---是否在航站楼登机口
 tic
 c5=[];
-c6=[];
-for i=1:length(Da)
-    
-    c5=[c5;Ta(i)+Sa(i)<=1];
-    c6=[c6;Tl(i)+Sl(i)<=1];
+for i=1:I
+    temp=0;
+    for j=1:Jt
+        temp=temp+x(i,j);
+    end
+    c5=[c5;temp==T(i)];
 end
 toc
+
+%约束条件6---是否在卫星厅登机口
+tic
+c6=[];
+for i=1:I
+    temp=0;
+    for j=Jt+1:J
+        temp=temp+x(i,j);
+    end
+    c6=[c6;temp==S(i)];
+end
+toc
+
+
+%约束条件5---是否在航站楼登机口
+% tic
+% c7=[];
+% c8=[];
+% for i=1:length(Da)
+%     
+%     c7=[c5;Ta(i)+Sa(i)<=1];
+%     c8=[c6;Tl(i)+Sl(i)<=1];
+% end
+% toc
 C=[c1;c2;c3;c4;c5;c6];
 
 % 配置
@@ -154,13 +179,24 @@ x2=value(x);
 y2=value(y);
 save('x2.mat','x2') 
 save('y2.mat','y2')
+Ti=value(T);
+Si=value(S);
+save('Ti.mat','T') 
+save('Si.mat','S')
+
+
+
+
 
 %查看结果用，不重要
 % length(find(y1))   
 % fenpei=sum(x1,2)
 % find(fenpei==0)    
-x_Q1=load('C:\Users\张耹铭\Desktop\18F最终版\x.mat','x1')
-find(abs(x1-x_Q1.x1))
+% x_Q1=load('C:\Users\张耹铭\Desktop\18F最终版\x.mat','x1');
+% find(abs(x2-x_Q1.x1))
+
+
+
 
 
 
