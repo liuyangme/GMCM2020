@@ -45,6 +45,29 @@ net = train(net,pn,tn); %开始训练，其中pn为输入样本，tn为输出样本
 an = sim(net,pn); %用训练好的模型进行仿真
 a = postmnmx(an,mint,maxt); %把仿真得到的数据还原为原始数量级
 
+%因样本有限使用训练数据进行测试，通常必须用新鲜数据集进行测试
+x = 1990:2009;
+newk = a(1,:);
+newh = a(2,:);
+figure(2);
+subplot(2,1,1);
+plot(x,newk,'r-o',x,glkyl,'b--+');
+legend('网络输出客运量','实际客运量');
+xlabel('年份');ylabel('客运量/万人');
+title('运用工具箱客运量学习和测试对比图');
+subplot(2,1,2);plot(x,newh,'r-o',x,glhyl,'b--+');
+legend('网络输出货运量','实际货运量');
+xlabel('年份');ylabel('货运量/万吨');
+title('运用工具箱货运量学习和测试对比图');
+
+%利用训练好的网络进行预测
+%当用训练好的网络对新数据pnew进行预测时，也应做相应处理
+pnew=[73.39 75.55 
+    3.9635 4.0975
+    0.9880 1.0268];  %2010年2011年相关数据
+pnewn = tramnmx(pnew,minp,maxp);   %利用原始输入数据的归一化参数对新数据进行归一化
+anewn = sim(net,pnewn);    %利用归一化后的数据进行仿真
+anew = postmnmx(anewn,mint,maxt);  %把仿真得到的数据还原为原始的数量级
 
 
 
