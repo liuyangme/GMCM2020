@@ -12,8 +12,12 @@
 % 0.5-0.8 中等程度相关
 % 0.3-0.5 弱相关
 % <0.3 认为不相关
-filename = '附件一相关性.xlsx';
-xRange = 'C4:MN324';
+clc;
+clear;
+close;
+
+filename = '5插值完成.xlsx';
+xRange = 'C4:MI328';
 xdata = xlsread(filename,xRange);
 
 coeff = corr(xdata,'type','Spearman');
